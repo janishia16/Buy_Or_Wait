@@ -153,6 +153,10 @@ The pipeline runs automatically when new data arrives, or you can:
 
 > Use the pre-built dashboard to visualize price trends and comparisons
 
+#### Dashboard Preview
+
+![Book Price Dashboard](https://raw.githubusercontent.com/janishia16/Images/main/image.png)
+
 #### 3.1 Import the dashboard
 
 1. Go to Databricks → SQL → Dashboards
