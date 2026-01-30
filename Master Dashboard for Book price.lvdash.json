@@ -1,0 +1,561 @@
+{
+  "datasets": [
+    {
+      "name": "f17506ed",
+      "displayName": "Data",
+      "queryLines": [
+        "SELECT * FROM layers.silver.book_master\n"
+      ],
+      "catalog": "layers",
+      "schema": "silver"
+    },
+    {
+      "name": "848d50b5",
+      "displayName": "Daily Data",
+      "queryLines": [
+        "SELECT * FROM layers.silver.book_master\n",
+        "where scrape_date=\"2026-01-29\" "
+      ]
+    },
+    {
+      "name": "f752c05a",
+      "displayName": "Where to Buy",
+      "queryLines": [
+        "-- Where to Buy TODAY with Price Trend from Yesterday\n",
+        "WITH today_prices AS (\n",
+        "    SELECT book_name, source, price\n",
+        "    FROM layers.silver.book_master\n",
+        "    WHERE scrape_date = (\n",
+        "        SELECT MAX(scrape_date) \n",
+        "        FROM layers.silver.book_master\n",
+        "    )\n",
+        "),\n",
+        "yesterday_prices AS (\n",
+        "    SELECT book_name, source, price\n",
+        "    FROM layers.silver.book_master\n",
+        "    WHERE scrape_date = (\n",
+        "        SELECT MAX(scrape_date) - INTERVAL 1 DAY \n",
+        "        FROM layers.silver.book_master\n",
+        "    )\n",
+        "),\n",
+        "today_comparison AS (\n",
+        "    SELECT \n",
+        "        a.book_name,\n",
+        "        a.price AS amazon_today,\n",
+        "        f.price AS flipkart_today,\n",
+        "        CASE WHEN a.price < f.price THEN 'Amazon' ELSE 'Flipkart' END AS buy_from,\n",
+        "        CASE WHEN a.price < f.price THEN a.price ELSE f.price END AS best_price\n",
+        "    FROM today_prices a\n",
+        "    JOIN today_prices f ON a.book_name = f.book_name\n",
+        "    WHERE a.source = 'Amazon' AND f.source = 'Flipkart'\n",
+        "),\n",
+        "yesterday_best AS (\n",
+        "    SELECT \n",
+        "        a.book_name,\n",
+        "        CASE WHEN a.price < f.price THEN a.price ELSE f.price END AS yesterday_best_price\n",
+        "    FROM yesterday_prices a\n",
+        "    JOIN yesterday_prices f ON a.book_name = f.book_name\n",
+        "    WHERE a.source = 'Amazon' AND f.source = 'Flipkart'\n",
+        ")\n",
+        "SELECT \n",
+        "    t.book_name AS `Book`,\n",
+        "    t.amazon_today AS `Amazon Today (₹)`,\n",
+        "    t.flipkart_today AS `Flipkart Today (₹)`,\n",
+        "    t.best_price AS `Best Price (₹)`,\n",
+        "    y.yesterday_best_price AS `Yesterday Best (₹)`,\n",
+        "    t.best_price - y.yesterday_best_price AS `Change (₹)`,\n",
+        "    CASE \n",
+        "        WHEN t.best_price < y.yesterday_best_price THEN '✅ BUY NOW - Price Dropped!'\n",
+        "        WHEN t.best_price > y.yesterday_best_price THEN '⏳ Wait - Price Increased'\n",
+        "        ELSE '🔄 Same Price'\n",
+        "    END AS `Recommendation`,\n",
+        "    CONCAT('🛒 ', t.buy_from) AS `Buy From`\n",
+        "FROM today_comparison t\n",
+        "JOIN yesterday_best y ON t.book_name = y.book_name\n",
+        "ORDER BY (t.best_price - y.yesterday_best_price)"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "15f66a2f",
+      "displayName": "Price Trend",
+      "layout": [
+        {
+          "widget": {
+            "name": "price-trend-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f17506ed",
+                  "fields": [
+                    {
+                      "name": "book_name",
+                      "expression": "`book_name`"
+                    },
+                    {
+                      "name": "scrape_date",
+                      "expression": "`scrape_date`"
+                    },
+                    {
+                      "name": "price",
+                      "expression": "`price`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`source` IN ('Amazon')"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "scrape_date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "price",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "book_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Price Trend Over Time in Amazon",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "price-trend-over-time-flipkart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f17506ed",
+                  "fields": [
+                    {
+                      "name": "book_name",
+                      "expression": "`book_name`"
+                    },
+                    {
+                      "name": "scrape_date",
+                      "expression": "`scrape_date`"
+                    },
+                    {
+                      "name": "price",
+                      "expression": "`price`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`source` IN ('Flipkart')"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "scrape_date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "price",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "book_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "frame": {
+                "showDescription": false,
+                "title": "Price Trend Over Time in Flipkart",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 1,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "book-name",
+            "queries": [
+              {
+                "name": "dashboards/01f0fc39ee721b62b1a468c6101d138a/datasets/01f0fc39f5f81e7dbbbe0a9053c2a909_book_name",
+                "query": {
+                  "datasetName": "f17506ed",
+                  "fields": [
+                    {
+                      "name": "book_name",
+                      "expression": "`book_name`"
+                    },
+                    {
+                      "name": "book_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "book_name",
+                    "queryName": "dashboards/01f0fc39ee721b62b1a468c6101d138a/datasets/01f0fc39f5f81e7dbbbe0a9053c2a909_book_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Book Name"
+              },
+              "disallowAll": false
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "8b8c0928",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f752c05a",
+                  "fields": [
+                    {
+                      "name": "Book",
+                      "expression": "`Book`"
+                    },
+                    {
+                      "name": "Amazon Today (₹)",
+                      "expression": "`Amazon Today (₹)`"
+                    },
+                    {
+                      "name": "Flipkart Today (₹)",
+                      "expression": "`Flipkart Today (₹)`"
+                    },
+                    {
+                      "name": "Best Price (₹)",
+                      "expression": "`Best Price (₹)`"
+                    },
+                    {
+                      "name": "Buy From",
+                      "expression": "`Buy From`"
+                    },
+                    {
+                      "name": "Yesterday Best (₹)",
+                      "expression": "`Yesterday Best (₹)`"
+                    },
+                    {
+                      "name": "Recommendation",
+                      "expression": "`Recommendation`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "Book",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 0,
+                    "title": "Book",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Amazon Today (₹)",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 1,
+                    "title": "Amazon Today (₹)",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Flipkart Today (₹)",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 2,
+                    "title": "Flipkart Today (₹)",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Best Price (₹)",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 3,
+                    "title": "Best Price (₹)",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Buy From",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 4,
+                    "title": "Buy From",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Yesterday Best (₹)",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 5,
+                    "title": "Yesterday Best (₹)",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Recommendation",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 7,
+                    "title": "Recommendation",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "Change (₹)",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 6,
+                  "title": "Change (₹)",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 6,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "452abc5f",
+      "displayName": "Global Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
