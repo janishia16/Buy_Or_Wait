@@ -1,0 +1,21 @@
+isbn,book_name,author,source,price,scrape_ts,url,book_id
+1847941834,Atomic Habits,James Clear,Amazon,497,2026-01-29 15:50:01.523210,https://www.amazon.in/Atomic-Habits-James-Clear/dp/1847941834,
+9781847941831,Atomic Habits,,Flipkart,259,2026-01-29 15:50:11.495219,https://www.flipkart.com/atomic-habits-easy-proven-way-build-good-break-bad/p/itmfcyurt9pfakjh?pid=9781847941831,
+1529418933,Seven Days in June,Tia Williams,Amazon,484,2026-01-29 15:50:21.151330,https://www.amazon.in/Seven-Days-June-Tia-Williams/dp/1529418933,
+9781538719107,Seven Days in June,,Flipkart,479,2026-01-29 15:50:30.574131,https://www.flipkart.com/seven-days-june/p/itm19e179a8659f9,
+1472200349,The ocean at the end of the lane,Neil Gaiman,Amazon,411,2026-01-29 15:50:38.678376,https://www.amazon.in/OCEAN-AT-END-LANE/dp/1472200349,
+9781472260222,The ocean at the end of the lane,,Flipkart,550,2026-01-29 15:51:05.318946,https://www.flipkart.com/ocean-end-lane/p/itmfbydp53r3rsv8,
+1399700596,The House across the lake,Riley Sager,Amazon,403,2026-01-29 15:51:13.670364,https://www.amazon.in/HOUSE-ACROSS-LAKE-Riley-Sager/dp/1399700596,
+9781399700597,The House across the lake,,Flipkart,226,2026-01-29 15:51:23.280725,https://www.flipkart.com/house-across-lake/p/itm056aa2267567e,
+1529157463,Project Hail Mary,Andy Weir,Amazon,371,2026-01-29 15:51:31.750192,https://www.amazon.in/Project-Hail-Mary-bestselling-Martian/dp/1529157463,
+9781529157468,Project Hail Mary,,Flipkart,371,2026-01-29 15:51:41.252859,https://www.flipkart.com/project-hail-mary/p/itm5ebf3f4ae8087,
+1847941834,Atomic Habits,James Clear,Amazon,497,2026-01-30 08:56:21.131361,https://www.amazon.in/Atomic-Habits-James-Clear/dp/1847941834,1.0
+9781847941831,Atomic Habits,,Flipkart,259,2026-01-30 08:56:31.004993,https://www.flipkart.com/atomic-habits-easy-proven-way-build-good-break-bad/p/itmfcyurt9pfakjh?pid=9781847941831,2.0
+1529418933,Seven Days in June,Tia Williams,Amazon,484,2026-01-30 08:56:40.541641,https://www.amazon.in/Seven-Days-June-Tia-Williams/dp/1529418933,3.0
+9781538719107,Seven Days in June,,Flipkart,479,2026-01-30 08:56:49.989672,https://www.flipkart.com/seven-days-june/p/itm19e179a8659f9,4.0
+1472200349,The ocean at the end of the lane,Neil Gaiman,Amazon,405,2026-01-30 08:56:58.222335,https://www.amazon.in/OCEAN-AT-END-LANE/dp/1472200349,5.0
+9781472260222,The ocean at the end of the lane,,Flipkart,550,2026-01-30 08:57:24.867700,https://www.flipkart.com/ocean-end-lane/p/itmfbydp53r3rsv8,6.0
+1399700596,The House across the lake,Riley Sager,Amazon,403,2026-01-30 08:57:33.159338,https://www.amazon.in/HOUSE-ACROSS-LAKE-Riley-Sager/dp/1399700596,7.0
+9781399700597,The House across the lake,,Flipkart,226,2026-01-30 08:57:42.897239,https://www.flipkart.com/house-across-lake/p/itm056aa2267567e,8.0
+1529157463,Project Hail Mary,Andy Weir,Amazon,371,2026-01-30 08:57:50.963104,https://www.amazon.in/Project-Hail-Mary-bestselling-Martian/dp/1529157463,9.0
+9781529157468,Project Hail Mary,,Flipkart,371,2026-01-30 08:58:00.607119,https://www.flipkart.com/project-hail-mary/p/itm5ebf3f4ae8087,10.0
